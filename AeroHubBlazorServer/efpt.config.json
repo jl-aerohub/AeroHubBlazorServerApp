@@ -14,6 +14,38 @@
    "SelectedToBeGenerated": 0,
    "Tables": [
       {
+         "Name": "[dbo].[ActualComponentSet]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CharacteristicFeatureReference]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CharacteristicItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[FeatureItems]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[MeasuredCharacterFeatureReference]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[MeasuredCharacteristics]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[MeasuredFeatures]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[MeasurementResults]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[MetaData]",
          "ObjectType": 0
       },
@@ -22,7 +54,15 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[InsertAeroHubMappingQIF]",
+         "ObjectType": 1
+      },
+      {
          "Name": "[dbo].[InsertNewQIF]",
+         "ObjectType": 1
+      },
+      {
+         "Name": "[dbo].[UpdateIDMax]",
          "ObjectType": 1
       }
    ],

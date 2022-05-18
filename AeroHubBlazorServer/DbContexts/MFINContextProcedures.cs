@@ -40,7 +40,9 @@ namespace AeroHubBlazorServer.DbContexts
 
     public interface IMFINContextProcedures
     {
+        Task<int> InsertAeroHubMappingQIFAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
         Task<List<InsertNewQIFResult>> InsertNewQIFAsync(Guid? QPID, int? IDMax, string MBDFILE, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
+        Task<int> UpdateIDMaxAsync(Guid? QPID, int? IDMax, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default);
     }
 
     public partial class MFINContextProcedures : IMFINContextProcedures
@@ -50,6 +52,26 @@ namespace AeroHubBlazorServer.DbContexts
         public MFINContextProcedures(MFINContext context)
         {
             _context = context;
+        }
+
+        public virtual async Task<int> InsertAeroHubMappingQIFAsync(OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        {
+            var parameterreturnValue = new SqlParameter
+            {
+                ParameterName = "returnValue",
+                Direction = System.Data.ParameterDirection.Output,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
+
+            var sqlParameters = new []
+            {
+                parameterreturnValue,
+            };
+            var _ = await _context.Database.ExecuteSqlRawAsync("EXEC @returnValue = [dbo].[InsertAeroHubMappingQIF]", sqlParameters, cancellationToken);
+
+            returnValue?.SetValue(parameterreturnValue.Value);
+
+            return _;
         }
 
         public virtual async Task<List<InsertNewQIFResult>> InsertNewQIFAsync(Guid? QPID, int? IDMax, string MBDFILE, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
@@ -85,6 +107,38 @@ namespace AeroHubBlazorServer.DbContexts
                 parameterreturnValue,
             };
             var _ = await _context.SqlQueryAsync<InsertNewQIFResult>("EXEC @returnValue = [dbo].[InsertNewQIF] @QPID, @IDMax, @MBDFILE", sqlParameters, cancellationToken);
+
+            returnValue?.SetValue(parameterreturnValue.Value);
+
+            return _;
+        }
+
+        public virtual async Task<int> UpdateIDMaxAsync(Guid? QPID, int? IDMax, OutputParameter<int> returnValue = null, CancellationToken cancellationToken = default)
+        {
+            var parameterreturnValue = new SqlParameter
+            {
+                ParameterName = "returnValue",
+                Direction = System.Data.ParameterDirection.Output,
+                SqlDbType = System.Data.SqlDbType.Int,
+            };
+
+            var sqlParameters = new []
+            {
+                new SqlParameter
+                {
+                    ParameterName = "QPID",
+                    Value = QPID ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.UniqueIdentifier,
+                },
+                new SqlParameter
+                {
+                    ParameterName = "IDMax",
+                    Value = IDMax ?? Convert.DBNull,
+                    SqlDbType = System.Data.SqlDbType.Int,
+                },
+                parameterreturnValue,
+            };
+            var _ = await _context.Database.ExecuteSqlRawAsync("EXEC @returnValue = [dbo].[UpdateIDMax] @QPID, @IDMax", sqlParameters, cancellationToken);
 
             returnValue?.SetValue(parameterreturnValue.Value);
 

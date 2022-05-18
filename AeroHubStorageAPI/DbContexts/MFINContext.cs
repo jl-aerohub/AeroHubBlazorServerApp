@@ -10,9 +10,9 @@ namespace AeroHubBlazorServer.DbContexts
 {
     public partial class MFINContext : DbContext
     {
-        public MFINContext()
-        {
-        }
+        //public MFINContext()
+        //{
+        //}
 
         public MFINContext(DbContextOptions<MFINContext> options)
             : base(options)
@@ -28,41 +28,6 @@ namespace AeroHubBlazorServer.DbContexts
             {
                 entity.Property(e => e.id).ValueGeneratedNever();
 
-                entity.Property(e => e.DateTime).HasColumnType("datetime");
-
-                entity.Property(e => e.DocumentType)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.FileLink)
-                    .IsRequired()
-                    .IsUnicode(false);
-
-                entity.Property(e => e.FileName)
-                    .IsRequired()
-                    .IsUnicode(false);
-
-                entity.Property(e => e.PartNumber)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.ProcessNumber)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.SupplierName)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.User)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
                 entity.HasOne(d => d.QP)
                     .WithMany(p => p.MetaData)
                     .HasForeignKey(d => d.QPID)
@@ -72,13 +37,7 @@ namespace AeroHubBlazorServer.DbContexts
 
             modelBuilder.Entity<QIFDocument>(entity =>
             {
-                entity.HasKey(e => e.QPID);
-
                 entity.Property(e => e.QPID).ValueGeneratedNever();
-
-                entity.Property(e => e.MBD)
-                    .IsRequired()
-                    .HasColumnType("xml");
             });
 
             OnModelCreatingGeneratedProcedures(modelBuilder);

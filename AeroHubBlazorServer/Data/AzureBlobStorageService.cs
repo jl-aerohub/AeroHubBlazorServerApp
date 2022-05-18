@@ -6,8 +6,8 @@ namespace AeroHubBlazorServer.Data
     public class AzureBlobStorageService : IStorageInterface
     {
         private readonly BlobServiceClient blobServiceClient;
-        private readonly BlobContainerClient containerClient;
-        private BlobClient blobClient;
+        public readonly BlobContainerClient containerClient;
+        private BlobClient? blobClient;
 
         public AzureBlobStorageService(BlobServiceClient blobServiceClient,BlobContainerClient containerClient)
         {

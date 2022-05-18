@@ -2,6 +2,9 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace AeroHubBlazorServer.Models
 {
@@ -12,10 +15,14 @@ namespace AeroHubBlazorServer.Models
             MetaData = new HashSet<MetaData>();
         }
 
+        [Key]
         public Guid QPID { get; set; }
         public int IDMax { get; set; }
+        [Required]
+        [Column(TypeName = "xml")]
         public string MBD { get; set; }
 
+        [InverseProperty("QP")]
         public virtual ICollection<MetaData> MetaData { get; set; }
     }
 }

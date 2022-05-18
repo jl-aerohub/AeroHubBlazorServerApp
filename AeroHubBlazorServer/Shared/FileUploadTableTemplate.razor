@@ -4,6 +4,7 @@
 @using AeroHubBlazorServer.Interfaces
 @using AeroHubBlazorServer.Models
 @using AeroHubBlazorServer.Pages
+@using Azure
 @using Azure.Storage.Blobs
 @inject ILogger<CreateMetaFile> Logger
 @inject IWebHostEnvironment Environment
@@ -93,8 +94,21 @@
 
         foreach (IBrowserFile localFile in loadedFiles)
         {
+            string? blobUri=null;
+            try
+            {
+                blobUri = await azureBlobStorage.UploadMetaFile(localFile);
+            }
+            catch(IOException ex)
+            {
+                Logger.LogError(ex,"There was an IOException.");
+            }
+            catch(RequestFailedException ex)
+            {
+                Logger.LogError(ex,"There was a request issue.");
+            }
 
-            var blobUri = await azureBlobStorage.UploadMetaFile(localFile);
+            
 
             if (blobUri is not null)
             {

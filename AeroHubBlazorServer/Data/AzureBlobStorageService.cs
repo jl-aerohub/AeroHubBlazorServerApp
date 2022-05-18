@@ -28,13 +28,9 @@ namespace AeroHubBlazorServer.Data
                 await blobClient.UploadAsync(fs);
                 uri = blobClient.Uri.AbsoluteUri;
             }
-            catch (RequestFailedException ex)
+            catch (Exception)
             {
-               //log the error
-            }
-            catch(IOException ex)
-            {
-                //logg this one too
+                throw;
             }
 
             return uri;

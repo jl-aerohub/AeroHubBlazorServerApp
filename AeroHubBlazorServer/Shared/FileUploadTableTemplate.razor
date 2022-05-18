@@ -1,10 +1,11 @@
 ﻿@using System.Diagnostics.CodeAnalysis
 @using AeroHubBlazorServer.Data
+@using AeroHubBlazorServer.Interfaces
 @using AeroHubBlazorServer.Pages
 @using Azure.Storage.Blobs
 @inject ILogger<CreateMetaFile> Logger
 @inject IWebHostEnvironment Environment
-@inject AzureBlobStorageService azureBlobStorage
+@inject IStorageInterface azureBlobStorage
 
 
 
@@ -80,8 +81,6 @@
                     file.Name, ex.Message);
             }
         }
-
-
     }
 
     public async Task UploadFiles()
@@ -90,46 +89,26 @@
         combinedUploadSize = loadedFiles.Sum(x => x.Size);
         totalUploadedBytes = 0;
 
-        Progress<long> progressHandler = new Progress<long>();
-        progressHandler.ProgressChanged += UploadProgressChanged;
+
 
         foreach (IBrowserFile localFile in loadedFiles)
         {
-            var blobClient = azureBlobStorage.containerClient.GetBlobClient(Path.GetFileName(localFile.Name));
+
 
             try
             {
-                using Stream fs = localFile.OpenReadStream();
-                await blobClient.UploadAsync(fs, progressHandler: progressHandler);
+               await azureBlobStorage.UploadMetaFile(localFile);
             }
             catch (Exception ex)
             {
                 Logger.LogError("File: {Filename} Error: {Error}",
                         localFile.Name, ex.Message);
             }
-
-
         }
         loadedFiles.Clear();
         isLoading = false;
     }
-    private string GetProgressPercentage(double totalSize, double currentTotalUploaded)
-    {
-        return (currentTotalUploaded / totalSize).ToString("0%");
-    }
-    private async void UploadProgressChanged(object? sender, long uploadedBytes)
-    {
-        //Calculate the progress and update the progress bar.
-        //Note: the bytes uploaded published back to us is in long. In order to calculate the percentage, the value has to be converted to double.
-        //Auto type casting from long to double happens here as part of function call
-        if (sender is not null)
-        {
-            totalUploadedBytes += uploadedBytes;
-            uploadPercent = GetProgressPercentage(combinedUploadSize, totalUploadedBytes);
-            await InvokeAsync(StateHasChanged);
-        }
-
-    }
+    
 
 
 }

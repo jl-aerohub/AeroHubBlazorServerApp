@@ -1,9 +1,10 @@
-﻿namespace AeroHubBlazorServer.Interfaces
+﻿using Microsoft.AspNetCore.Components.Forms;
+
+namespace AeroHubBlazorServer.Interfaces
 {
     public interface IStorageInterface
     {
-        Task UploadFile(string fileName);
-        Task<Stream> GetFileStream(string fileName);
+        Task UploadMetaFile(IBrowserFile browserFile);
 
     }
 }

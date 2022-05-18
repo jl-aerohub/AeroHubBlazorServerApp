@@ -1,28 +1,28 @@
 ﻿using AeroHubBlazorServer.Interfaces;
 using Azure.Storage.Blobs;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace AeroHubBlazorServer.Data
 {
     public class AzureBlobStorageService : IStorageInterface
     {
-        private readonly BlobServiceClient blobServiceClient;
-        public readonly BlobContainerClient containerClient;
-        private BlobClient? blobClient;
+        public readonly BlobContainerClient _containerClient;
 
-        public AzureBlobStorageService(BlobServiceClient blobServiceClient,BlobContainerClient containerClient)
+
+        public AzureBlobStorageService(BlobServiceClient blobServiceClient, string containerName)
         {
-            this.blobServiceClient = blobServiceClient;
-            this.containerClient = containerClient;
+            _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
         }
 
-        public Task<Stream> GetFileStream(string fileName)
+        public async Task UploadMetaFile(IBrowserFile browserFile)
         {
-            throw new NotImplementedException();
+            var blobClient = _containerClient.GetBlobClient(Path.GetFileName(browserFile.Name));
+
+            using Stream fs = browserFile.OpenReadStream();
+            await blobClient.UploadAsync(fs);
+
+
         }
 
-        public async Task UploadFile(string localFilePath)
-        {
-            await blobClient.UploadAsync(localFilePath, true);
-        }
     }
 }

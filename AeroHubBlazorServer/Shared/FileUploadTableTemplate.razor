@@ -1,11 +1,14 @@
 ﻿@using System.Diagnostics.CodeAnalysis
+@using AeroHubBlazorServer.Controllers
 @using AeroHubBlazorServer.Data
 @using AeroHubBlazorServer.Interfaces
+@using AeroHubBlazorServer.Models
 @using AeroHubBlazorServer.Pages
 @using Azure.Storage.Blobs
 @inject ILogger<CreateMetaFile> Logger
 @inject IWebHostEnvironment Environment
 @inject IStorageInterface azureBlobStorage
+@inject MetaDatasController controller
 
 
 
@@ -57,6 +60,7 @@
 
 @code {
     private List<IBrowserFile> loadedFiles = new();
+    private List<MetaData> metaFiles = new();
     private bool isLoading = false;
     private string uploadPercent = "";
     private long combinedUploadSize = 0;
@@ -86,27 +90,31 @@
     public async Task UploadFiles()
     {
         isLoading = true;
-        combinedUploadSize = loadedFiles.Sum(x => x.Size);
-        totalUploadedBytes = 0;
-
-
 
         foreach (IBrowserFile localFile in loadedFiles)
         {
 
+            var blobUri = await azureBlobStorage.UploadMetaFile(localFile);
 
-            try
+            if (blobUri is not null)
             {
-               await azureBlobStorage.UploadMetaFile(localFile);
+                MetaData metaData = new MetaData()
+                {
+                    FileLink = blobUri.ToString()
+                };
+
+                await controller.PostMetaData(metaData);
+
             }
-            catch (Exception ex)
+            else
             {
-                Logger.LogError("File: {Filename} Error: {Error}",
-                        localFile.Name, ex.Message);
+                //render error message
             }
+
         }
         loadedFiles.Clear();
         isLoading = false;
+
     }
     
 

@@ -1,3 +1,4 @@
+using AeroHubBlazorServer.Controllers;
 using AeroHubBlazorServer.Data;
 using AeroHubBlazorServer.DbContexts;
 using AeroHubBlazorServer.Interfaces;
@@ -27,6 +28,8 @@ builder.Services.AddAzureClients(_ =>
 
 builder.Services.AddScoped<IStorageInterface, AzureBlobStorageService>(
     provider => new AzureBlobStorageService(provider.GetRequiredService<BlobServiceClient>(), builder.Configuration["ContainerName"]));
+
+builder.Services.AddScoped<MetaDatasController>();
 
 var app = builder.Build();
 

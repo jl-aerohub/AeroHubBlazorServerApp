@@ -25,7 +25,8 @@ builder.Services.AddAzureClients(_ =>
         builder.Configuration["AzureStorageConnectionString"]);
 });
 
-builder.Services.AddScoped<IStorageInterface,AzureBlobStorageService>(provider => new AzureBlobStorageService(provider.GetRequiredService<BlobServiceClient>(),builder.Configuration["ContainerName"]));
+builder.Services.AddScoped<IStorageInterface, AzureBlobStorageService>(
+    provider => new AzureBlobStorageService(provider.GetRequiredService<BlobServiceClient>(), builder.Configuration["ContainerName"]));
 
 var app = builder.Build();
 

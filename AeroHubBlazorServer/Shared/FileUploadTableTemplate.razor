@@ -6,18 +6,15 @@
 @using AeroHubBlazorServer.Pages
 @using Azure
 @using Azure.Storage.Blobs
-@inject ILogger<CreateMetaFile> Logger
+@inject ILogger<FileUploadTableTemplate> Logger
 @inject IWebHostEnvironment Environment
 @inject IStorageInterface azureBlobStorage
 @inject MetaDatasController controller
 
 
 
-<h3>FileUploadTableTemplate</h3>
+<h3>Supplementary Files</h3>
 
-<h1>Multiple files</h1>
-
-<p>A multi-file picker that displays information about selection and shows progress as each one is loaded.</p>
 <div>
     <label for="uploadFiles">Select File(s)</label>
     <InputFile id="uploadFiles" multiple OnChange="LoadFiles" />

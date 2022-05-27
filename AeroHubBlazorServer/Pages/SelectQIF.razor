@@ -31,8 +31,10 @@
     <ul>
         @foreach (QIFDocument QIFFile in QIFFiles)
         {
-            <li>@QIFFile.QPID</li>
-            <li>Im Here</li>
+            <li>
+            <a id="exportQIF" class="btn" @onclick="()=>DownloadQIF(QIFFile.QPID.ToString())" download="Myfile.qif" 
+                role="button" target="=_top">@QIFFile.QPID</a>
+            </li>
         }
     </ul>
 </div>
@@ -60,6 +62,11 @@
     protected override async Task OnInitializedAsync()
     {
         QIFFiles = await controller.GetQIFFiles();
+    }
+
+    public async Task DownloadQIF(string qpid)
+    {
+        await controller.GetQIF(qpid);
     }
 
     public async void OnInputFileChange(InputFileChangeEventArgs e)

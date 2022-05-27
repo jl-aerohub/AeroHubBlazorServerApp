@@ -7,6 +7,8 @@
 @using AeroHubBlazorServer.Data
 @using AeroHubBlazorServer.Shared
 @using System.Xml.Linq
+@using AeroHubBlazorServer.Controllers
+@inject MetaDatasController controller
 
 
 <PageTitle>QIF Upload</PageTitle>
@@ -16,6 +18,16 @@
 
 <div>
     <InputFile OnChange="OnInputFileChange" id="exampleInputFile" multiple accept=".qif"></InputFile> 
+</div>
+
+<div>
+    <ul>
+        @foreach (QIFDocument document in qIFs)
+        {
+            <li>@document.QPID</li>
+
+        }
+    </ul>
 </div>
    
 
@@ -40,6 +52,12 @@
 @code {
 
     private QIFDocument qIFDocument = new();
+    private List<QIFDocument> qIFs = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        qIFs = await controller.ListQIFs();
+    }
 
     IBrowserFile? File;
     public async void OnInputFileChange(InputFileChangeEventArgs e)

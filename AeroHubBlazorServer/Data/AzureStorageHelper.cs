@@ -25,7 +25,7 @@ namespace FileHandlingServer.Data
         public async Task<List<string>> GetFileList(string containerName)
         {
             var files = new List<string>();
-            var container = OpenContianer(containerName);
+            var container = OpenContainer(containerName);
             if (container == null) return files;
 
             try
@@ -47,7 +47,7 @@ namespace FileHandlingServer.Data
 
         public async Task<string> UploadFile(string containerName, string sourceFilename, string destFileName, bool overWrite)
         {
-            var container = OpenContianer(containerName);
+            var container = OpenContainer(containerName);
             if (container == null) return "";
             try
             {
@@ -85,7 +85,7 @@ namespace FileHandlingServer.Data
 
         public async Task<string> DownloadFile(string containerName, string sourceFilename, string destFileName)
         {
-            var container = OpenContianer(containerName);
+            var container = OpenContainer(containerName);
             if (container == null) return "";
 
             try
@@ -110,7 +110,7 @@ namespace FileHandlingServer.Data
             }
         }
 
-        BlobContainerClient OpenContianer(string containerName)
+        BlobContainerClient OpenContainer(string containerName)
         {
             try
             {

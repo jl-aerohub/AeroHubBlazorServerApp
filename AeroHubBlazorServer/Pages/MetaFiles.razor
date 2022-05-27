@@ -1,4 +1,6 @@
-﻿@using System.Diagnostics.CodeAnalysis
+﻿@page "/MetaFiles"
+
+@using System.Diagnostics.CodeAnalysis
 @using AeroHubBlazorServer.Controllers
 @using AeroHubBlazorServer.Data
 @using AeroHubBlazorServer.Interfaces
@@ -8,46 +10,72 @@
 @using Azure.Storage.Blobs
 @inject MetaDatasController controller
 
-@page "/MetaFiles"
-
 <PageTitle>MetaFiles</PageTitle>
 
 <table class="table">
     <thead>
         <tr>
             <th>
-                FileName
+                File Name
             </th>
             <th>
-                DocumentType
+                id
             </th>
             <th>
-                FeatureItemids
+                Document Type
             </th>
             <th>
-                PartNumber
+                Feature Item id
             </th>
             <th>
-                FileLink
+                Part Number
+            </th>
+            <th>
+                File Link
             </th>
             <th>
                 User
             </th>
             <th>
-                DateTime
+                Date Time
             </th>
             <th>
                 Signatures
             </th>
             <th>
-                SupplierName
+                Supplier Name
             </th>
             <th>
-                ProcessNumber
+                Process Number
             </th>
             <th>
-                QP
+                QPID
+            </th>
+            <th>
+                NDA Number
+            </th>
+            <th>
+                IP Number
+            </th>
+            <th>
+                LTA Number
+            </th>
+            <th>
+                MVA Number
+            </th>
+            <th>
+                Supplier Document Number
+            </th>
+            <th>
+                Engine Serial Number
+            </th>
+            <th>
+                Engine Operator
+            </th>
+            <th>
+                Overhaul Date
             </th>
         </tr>
     </thead>
+   
 </table>

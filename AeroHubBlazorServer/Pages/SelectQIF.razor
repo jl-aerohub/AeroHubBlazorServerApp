@@ -24,14 +24,14 @@
 
 <div>
     @*InputFile is a standard input box provided by AspNetCore*@
-    <InputFile OnChange="OnInputFileChange" id="InputFile" multiple accept=".qif"></InputFile>
+    <InputFile OnChange="OnInputFileChange" id="InputFile" single accept=".qif"></InputFile>
 </div>
 
 <div>
     <ul>
         @foreach (QIFDocument QIFFile in QIFFiles)
         {
-            <li>@QIFFile.QPID</li>
+            <li>QIFFile.QPID</li>
             <li>Im Here</li>
         }
     </ul>

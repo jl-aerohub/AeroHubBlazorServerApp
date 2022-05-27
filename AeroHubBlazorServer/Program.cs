@@ -3,8 +3,10 @@ using AeroHubBlazorServer.Data;
 using AeroHubBlazorServer.DbContexts;
 using AeroHubBlazorServer.Interfaces;
 using Azure.Storage.Blobs;
+using FileHandlingServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,7 @@ builder.Services.AddScoped<IStorageInterface, AzureBlobStorageService>(
     provider => new AzureBlobStorageService(provider.GetRequiredService<BlobServiceClient>(), builder.Configuration["ContainerName"]));
 
 builder.Services.AddScoped<MetaDatasController>();
+builder.Services.AddScoped<AzureStorageHelper>();
 
 var app = builder.Build();
 
@@ -44,6 +47,13 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Files")),
+    RequestPath = "/Files"
+});
 
 app.UseRouting();
 

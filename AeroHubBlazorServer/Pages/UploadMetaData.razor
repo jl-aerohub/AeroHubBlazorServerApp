@@ -145,8 +145,11 @@
     private long combinedUploadSize = 0;
     private long totalUploadedBytes = 0;
 
+    private List<QIFDocument> QIFFiles = new();
+
     private EditModal Modal { get; set; }
 
+ 
     private void LoadFiles(InputFileChangeEventArgs e)
     {
 
@@ -221,6 +224,5 @@
         }
         metaFiles.Clear();
         isLoading = false;
-
     }
 }

@@ -134,5 +134,16 @@ namespace AeroHubBlazorServer.Controllers
         {
             return (_context.MetaData?.Any(e => e.id == id)).GetValueOrDefault();
         }
+
+        [HttpGet]
+        public async Task<List<QIFDocument>> GetQIFFiles()
+        {
+            if (_context.QIFDocument == null)
+            {
+                throw new InvalidOperationException("The database context is null");
+            }
+
+            return await _context.QIFDocument.ToListAsync();
+        }
     }
 }

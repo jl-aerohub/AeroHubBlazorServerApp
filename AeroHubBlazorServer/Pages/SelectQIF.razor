@@ -7,6 +7,16 @@
 @using AeroHubBlazorServer.Data
 @using AeroHubBlazorServer.Shared
 @using System.Xml.Linq
+@using System.Diagnostics.CodeAnalysis
+@using AeroHubBlazorServer.Pages
+@using Azure
+@using Azure.Storage.Blobs
+@using AeroHubBlazorServer.Controllers
+@using AeroHubBlazorServer.Interfaces
+@inject ILogger<UploadMetaData> Logger
+@inject IWebHostEnvironment Environment
+@inject IStorageInterface azureBlobStorage
+@inject MetaDatasController controller
 
 <PageTitle>QIF Selection</PageTitle>
 
@@ -15,6 +25,13 @@
 <div>
     @*InputFile is a standard input box provided by AspNetCore*@
     <InputFile OnChange="OnInputFileChange" id="InputFile" multiple accept=".qif"></InputFile>
+
+<ul>
+    @foreach (QIFDocument QIFFile in QIFFiles)
+    {
+        <li>@QIFFile.QPID</li>
+    }
+</ul>
 </div>
    
 @if (qIFDocument.QPID != Guid.Empty)
@@ -32,7 +49,7 @@
 }
 
 @code {
-
+    private List<QIFDocument> QIFFiles = new();
     private QIFDocument qIFDocument = new();
 
     IBrowserFile? File;
@@ -50,4 +67,7 @@
 
         await InvokeAsync(StateHasChanged);
     }
+
+    protected override async Task OnInitializedAsync() => QIFFiles = await controller.GetQIFFiles();
+
 }

@@ -1,0 +1,133 @@
+﻿@using System.Diagnostics.CodeAnalysis
+@using AeroHubBlazorServer.Controllers
+@using AeroHubBlazorServer.Data
+@using AeroHubBlazorServer.Interfaces
+@using AeroHubBlazorServer.Models
+@using AeroHubBlazorServer.Pages
+@using Azure
+@using Azure.Storage.Blobs
+@inject ILogger<FileUploadTableTemplate> Logger
+@inject IWebHostEnvironment Environment
+@inject IStorageInterface azureBlobStorage
+@inject MetaDatasController controller
+
+
+
+<h3>Supplementary Files</h3>
+
+<div>
+    <label for="uploadFiles">Select File(s)</label>
+    <InputFile id="uploadFiles" multiple OnChange="LoadFiles" />
+
+    <label for="uploadFolder">Select Folder</label>
+    <InputFile id="uploadFolder" multiple webkitdirectory OnChange="LoadFiles" />
+
+
+    <button @onclick="() => UploadFiles()" disabled="@isLoading">
+
+        <span>Upload Files</span>
+
+    </button>
+
+    @if (!isLoading)
+    {
+        <span>@uploadPercent</span>
+    }
+</div>
+
+
+
+@if (loadedFiles != null)
+{
+    foreach (IBrowserFile file in loadedFiles)
+    {
+        <div class="file-row">
+            <!-- File info -->
+            <div>
+                <h2>@file.Name</h2>
+                Size: <strong>@file.Size bytes</strong>;
+                Last modified: <strong>@file.LastModified</strong>;
+                Type: <strong>@file.ContentType</strong>
+            </div>
+
+        </div>
+    }
+}
+
+
+
+@code {
+    private List<IBrowserFile> loadedFiles = new();
+    private List<MetaData> metaFiles = new();
+    private bool isLoading = false;
+    private string uploadPercent = "";
+    private long combinedUploadSize = 0;
+    private long totalUploadedBytes = 0;
+
+
+
+    private void LoadFiles(InputFileChangeEventArgs e)
+    {
+
+        loadedFiles.Clear();
+
+        foreach (var file in e.GetMultipleFiles())
+        {
+            try
+            {
+                loadedFiles.Add(file);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("File: {Filename} Error: {Error}",
+                    file.Name, ex.Message);
+            }
+        }
+    }
+
+    public async Task UploadFiles()
+    {
+        isLoading = true;
+
+        foreach (IBrowserFile localFile in loadedFiles)
+        {
+            string? blobUri=null;
+            try
+            {
+                blobUri = await azureBlobStorage.UploadMetaFile(localFile);
+            }
+            catch(IOException ex)
+            {
+                Logger.LogError(ex,"There was an IOException.");
+            }
+            catch(RequestFailedException ex)
+            {
+                Logger.LogError(ex,"There was a request issue.");
+            }
+
+            
+
+            if (blobUri is not null)
+            {
+                MetaData metaData = new MetaData()
+                {
+                    FileLink = blobUri.ToString()
+                };
+
+                await controller.PostMetaData(metaData);
+
+            }
+            else
+            {
+                //render error message
+            }
+
+        }
+        loadedFiles.Clear();
+        isLoading = false;
+
+    }
+    
+
+
+}

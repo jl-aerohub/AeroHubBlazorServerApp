@@ -1,0 +1,53 @@
+﻿@page "/SelectQIF"
+@using System
+@using System.IO
+@using AeroHubBlazorServer.Models
+@using Microsoft.AspNetCore.Hosting
+@using Microsoft.Extensions.Logging
+@using AeroHubBlazorServer.Data
+@using AeroHubBlazorServer.Shared
+@using System.Xml.Linq
+
+<PageTitle>QIF Selection</PageTitle>
+
+<h3>QIF File Selection</h3>
+
+<div>
+    @*InputFile is a standard input box provided by AspNetCore*@
+    <InputFile OnChange="OnInputFileChange" id="InputFile" multiple accept=".qif"></InputFile>
+</div>
+   
+@if (qIFDocument.QPID != Guid.Empty)
+{
+    //Load separate view under current view
+    <div>
+        <label for="InputFile">
+            @if (qIFDocument.QPID != Guid.Empty)
+            {
+                @qIFDocument.QPID
+            }
+        </label>
+    </div>
+    <UploadMetaData QPId="@qIFDocument.QPID"/>
+}
+
+@code {
+
+    private QIFDocument qIFDocument = new();
+
+    IBrowserFile? File;
+    public async void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        using Stream ms = new MemoryStream();
+        await e.File.OpenReadStream().CopyToAsync(ms);
+        ms.Position = 0;
+
+        var xmlDoc = await XDocument.LoadAsync(ms, LoadOptions.None, new CancellationToken());
+
+        var qpid = xmlDoc.Descendants(XName.Get("QPId", "http://qifstandards.org/xsd/qif3")).SingleOrDefault()!;
+
+        qIFDocument.QPID = Guid.Parse(qpid.Value);
+
+        await InvokeAsync(StateHasChanged);
+    }
+}

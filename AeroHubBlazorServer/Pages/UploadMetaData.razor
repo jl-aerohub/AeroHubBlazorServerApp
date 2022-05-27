@@ -1,0 +1,226 @@
+﻿@using System.Diagnostics.CodeAnalysis
+@using AeroHubBlazorServer.Controllers
+@using AeroHubBlazorServer.Data
+@using AeroHubBlazorServer.Interfaces
+@using AeroHubBlazorServer.Models
+@using AeroHubBlazorServer.Pages
+@using Azure
+@using Azure.Storage.Blobs
+@inject ILogger<UploadMetaData> Logger
+@inject IWebHostEnvironment Environment
+@inject IStorageInterface azureBlobStorage
+@inject MetaDatasController controller
+
+<h3>Supplementary Files</h3>
+
+<div>
+    <label for="uploadFiles">Select File(s)</label>
+    <InputFile id="uploadFiles" multiple OnChange="LoadFiles" />
+
+    <label for="uploadFolder">Select Folder</label>
+    <InputFile id="uploadFolder" multiple webkitdirectory OnChange="LoadFiles" />
+
+    <button @onclick="() => UploadFiles()" disabled="@isLoading">
+
+        <span>Upload Selected Files</span>
+
+    </button>
+
+    @if (!isLoading)
+    {
+        <span>@uploadPercent</span>
+    }
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                File Name
+            </th>
+            <th>
+                id
+            </th>
+            <th>
+                Document Type
+            </th>
+            <th>
+                Feature Item id
+            </th>
+            <th>
+                Part Number
+            </th>
+            <th>
+                File Link
+            </th>
+            <th>
+                User
+            </th>
+            <th>
+                Date Time
+            </th>
+            <th>
+                Signatures
+            </th>
+            <th>
+                Supplier Name
+            </th>
+            <th>
+                Process Number
+            </th>
+            <th>
+                QPID
+            </th>
+            <th>
+                NDA Number
+            </th>
+            <th>
+                IP Number
+            </th>
+            <th>
+                LTA Number
+            </th>
+            <th>
+                MVA Number
+            </th>
+            <th>
+                Supplier Document Number
+            </th>
+            <th>
+                Engine Serial Number
+            </th>
+            <th>
+                Engine Operator
+            </th>
+            <th>
+                Overhaul Date
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (metaFiles != null)
+        {   
+            foreach (MetaData file in metaFiles)
+            {
+            <!-- File info -->
+            <tr>
+                <td>@file.FileName</td>
+                <td>@file.id</td>
+                <td>@file.DocumentType</td>
+                <td>@file.FeatureItemids</td>
+                <td>@file.PartNumber</td>
+                <td>@file.FileLink</td>
+                <td>@file.User</td>
+                <td>@file.DateTime;</td>
+                <td>@file.Signatures</td>
+                <td>@file.SupplierName</td>
+                <td>@file.ProcessNumber</td>
+                <td>@file.QPID</td>
+                <td>@file.NDANumber</td>
+                <td>@file.IPNumber</td>
+                <td>@file.LTANumber</td>
+                <td>@file.MVANumber</td>
+                <td>@file.SupplierDocumentNumber</td>
+                <td>@file.EngineSerialNumber</td>
+                <td>@file.EngineOperator</td>
+                <td>@file.OverhaulDate</td>
+                <td><button @onclick="() => OpenModal(file)">Edit</button></td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+
+<CascadingValue Value="this">
+    <EditModal Metafile="EditFile" @ref="Modal"></EditModal>
+</CascadingValue>
+
+@code {
+    private List<MetaData> metaFiles = new();
+    private MetaData EditFile = new();
+    [Parameter]
+    public Guid QPId { get; set; }
+    private bool isLoading = false;
+    private string uploadPercent = "";
+    private long combinedUploadSize = 0;
+    private long totalUploadedBytes = 0;
+
+    private EditModal Modal { get; set; }
+
+    private void LoadFiles(InputFileChangeEventArgs e)
+    {
+
+        //loadedFiles.Clear();
+
+        foreach (var file in e.GetMultipleFiles())
+        {
+            try
+            {
+                var metafile = new MetaData()
+                    {
+                        FileName = file.Name,
+                        DateTime = DateTime.Parse(file.LastModified.ToString()),
+                        BrowserFile = file,
+                        QPID = QPId,
+
+                    };
+
+                metaFiles.Add(metafile);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("File: {Filename} Error: {Error}",
+                    file.Name, ex.Message);
+            }
+        }
+    }
+
+    private void OpenModal(MetaData SelectedFile)
+    {
+        EditFile = SelectedFile;
+        Modal.Open();
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Refresh()
+    {
+        this.StateHasChanged();
+    }
+
+    public async Task UploadFiles()
+    {
+        isLoading = true;
+
+        foreach (MetaData metafile in metaFiles)
+        {
+            string? blobUri=null;
+            if (metafile.BrowserFile != null)
+            {
+                try
+                {
+                    blobUri = await azureBlobStorage.UploadMetaFile(metafile.BrowserFile);
+                }
+                catch (IOException ex)
+                {
+                    Logger.LogError(ex, "There was an IOException.");
+                }
+                catch (RequestFailedException ex)
+                {
+                    Logger.LogError(ex, "There was a request issue.");
+                }
+                if (blobUri is not null)
+                {
+                    metafile.FileLink = blobUri;
+                    await controller.PostMetaData(metafile);
+                }
+                else
+                {
+                    //render error message
+                }
+            }
+        }
+        metaFiles.Clear();
+        isLoading = false;
+
+    }
+}

@@ -1,60 +1,95 @@
 ﻿@page "/UploadQIF"
-@using System
-@using System.IO
-@using AeroHubBlazorServer.Models
-@using Microsoft.AspNetCore.Hosting
-@using Microsoft.Extensions.Logging
+
+@using System.Diagnostics.CodeAnalysis
+@using AeroHubBlazorServer.Controllers
 @using AeroHubBlazorServer.Data
-@using AeroHubBlazorServer.Shared
-@using System.Xml.Linq
+@using AeroHubBlazorServer.Interfaces
+@using AeroHubBlazorServer.Models
+@using AeroHubBlazorServer.Pages
+@using Azure
+@using Azure.Storage.Blobs
+@inject ILogger<UploadMetaData> Logger
+@inject IWebHostEnvironment Environment
+@inject IStorageInterface azureBlobStorage
+@inject MetaDatasController controller
 
+<PageTitle>QIF Selection</PageTitle>
 
-<PageTitle>QIF Upload</PageTitle>
-
-
-<h3>QIF File Upload</h3>
+<h3>QIF File Selection</h3>
 
 <div>
-    <InputFile OnChange="OnInputFileChange" id="exampleInputFile" multiple accept=".qif"></InputFile> 
+    @*InputFile is a standard input box provided by AspNetCore*@
+    <InputFile OnChange="LoadFile" id="InputFile" multiple accept=".qif"></InputFile>
+    <button @onclick="() => UploadFile()" disabled="@isLoading">
+
+        <span>Upload Selected Files</span>
+
+    </button>
+
+    @if (!isLoading)
+    {
+        <span>@uploadPercent</span>
+    }
 </div>
    
-
-<div>
-    <label for="exampleInputFile">
-        @if (qIFDocument.QPID != Guid.Empty)
-        {
-            @qIFDocument.QPID
-        }
-    </label>
-</div>
-
-
-
-@if (qIFDocument is not null)
-{
-    <FileUploadTableTemplate />
-}
-
-
-
 @code {
+    private List<MetaData> metaFiles = new();
+    private bool isLoading = false;
+    private string uploadPercent = "";
+    private long combinedUploadSize = 0;
+    private long totalUploadedBytes = 0;
 
-    private QIFDocument qIFDocument = new();
-
-    IBrowserFile? File;
-    public async void OnInputFileChange(InputFileChangeEventArgs e)
+    private void LoadFile(InputFileChangeEventArgs e)
     {
-        using Stream ms = new MemoryStream();
-        await e.File.OpenReadStream().CopyToAsync(ms);
-        ms.Position = 0;
 
-        var xmlDoc = await XDocument.LoadAsync(ms, LoadOptions.None, new CancellationToken());
+        //loadedFiles.Clear();
 
-        var qpid = xmlDoc.Descendants(XName.Get("QPId", "http://qifstandards.org/xsd/qif3")).SingleOrDefault()!;
+        foreach (var file in e.GetMultipleFiles())
+        {
+            try
+            {
+                var metafile = new MetaData()
+                    {
+                        FileName = file.Name,
+                        BrowserFile = file,
+                    };
 
-        qIFDocument.QPID = Guid.Parse(qpid.Value);
+                metaFiles.Add(metafile);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError("File: {Filename} Error: {Error}",
+                    file.Name, ex.Message);
+            }
+        }
+    }
 
-        await InvokeAsync(StateHasChanged);
+    public async Task UploadFile()
+    {
+        isLoading = true;
+
+        foreach (MetaData metafile in metaFiles)
+        {
+            string? blobUri=null;
+            if (metafile.BrowserFile != null)
+            {
+                try
+                {
+                    blobUri = await azureBlobStorage.UploadMetaFile(metafile.BrowserFile);
+                }
+                catch (IOException ex)
+                {
+                    Logger.LogError(ex, "There was an IOException.");
+                }
+                catch (RequestFailedException ex)
+                {
+                    Logger.LogError(ex, "There was a request issue.");
+                }
+            }
+        }
+        metaFiles.Clear();
+        isLoading = false;
 
     }
+
 }

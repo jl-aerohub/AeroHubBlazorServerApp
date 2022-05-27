@@ -1,0 +1,156 @@
+﻿@using AeroHubBlazorServer.Models
+
+<div class="modal @ModalClass" tabindex="-1" role="dialog" style="display:@ModalDisplay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit File</h5>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="@Metafile">
+                    <table>
+                        <tr>
+                            <td>File Name</td> 
+                            <td><InputText id="FileName" @bind-Value="Metafile.FileName"/></td>
+                        </tr>
+                        <tr>
+                            <td>Id</td>
+                            <td><InputNumber id="id" @bind-Value="Metafile.id" /></td>
+                        </tr>
+                        <tr>
+                            <td>Document Type</td>
+                            <td><InputSelect id="DocumentType" @bind-Value="Metafile.DocumentType">
+                                <option value="">Select classification ...</option>
+                                <option value="Exploration">Exploration</option>
+                                <option value="Diplomacy">Diplomacy</option>
+                                <option value="Defense">Defense</option>
+                            </InputSelect></td>
+                        </tr>
+                        <tr>
+                            <td>Feature Item Id</td>
+                            <td><InputNumber id="FeatureItemids" @bind-Value="Metafile.FeatureItemids" /></td>
+                        </tr>
+                        <tr>
+                            <td>Part Number</td>
+                            <td><InputText id="PartNumber" @bind-Value="Metafile.PartNumber" /></td>
+                        </tr>
+                        <tr>
+                            <td>File Link</td>
+                            <td><InputText id="FileLink" @bind-Value="Metafile.FileLink" /></td>
+                        </tr>
+                        <tr>
+                            <td>User</td>
+                            <td> <InputText id="User" @bind-Value="Metafile.User" /></td>
+                        </tr>
+                        <tr>
+                            <td>Date Time</td>
+                            <td><InputDate id="DateTime" @bind-Value="Metafile.DateTime" /></td>
+                        </tr>
+                        <tr>
+                            <td>Signatures</td>
+                            <td><InputSelect id="Signatures" @bind-Value="Metafile.Signatures">
+                                <option value="True">True</option>
+                                <option value="False">False</option>
+                            </InputSelect></td>
+                        </tr>
+                         <tr>
+                            <td>Supplier Name</td>
+                            <td><InputText id="SupplierName" @bind-Value="Metafile.SupplierName" /></td>
+                        </tr>
+                        <tr>
+                            <td>Process Number</td>
+                            <td><InputText id="ProcessNumber" @bind-Value="Metafile.ProcessNumber" /></td>
+                        </tr>
+                        <tr>
+                            <td>QPID</td>
+                            <td>@Metafile.QPID</td>
+                        </tr>
+                        <tr>
+                            <td>NDA Number</td>
+                            <td><InputNumber id="NDANumber" @bind-Value="Metafile.NDANumber" /></td>
+                        </tr>
+                        <tr>
+                            <td>IP Number</td>
+                            <td><InputNumber id="IPNumber" @bind-Value="Metafile.IPNumber" /></td>
+                        </tr>
+                        <tr>
+                            <td>LTA Number</td>
+                            <td><InputNumber id="LTANumber" @bind-Value="Metafile.LTANumber" /></td>
+                        </tr>
+                        <tr>
+                            <td>MVA Number</td>
+                            <td><InputNumber id="MVANumber" @bind-Value="Metafile.MVANumber" /></td>
+                        </tr>
+                        <tr>
+                            <td>Supplier Doucment Number</td>
+                            <td><InputNumber id="SupplierDocumentNumber" @bind-Value="Metafile.SupplierDocumentNumber" /></td>
+                        </tr>
+                        <tr>
+                            <td>Engine Serial Number</td>
+                            <td><InputText id="EngineSerialNumber" @bind-Value="Metafile.EngineSerialNumber" /></td>
+                        </tr>
+                        <tr>
+                            <td>Engine Operator</td>
+                            <td><InputText id="EngineOperator" @bind-Value="Metafile.EngineOperator" /></td>
+                        </tr>
+                        <tr>
+                            <td>Overhaul Date</td>
+                            <td><InputDate id="OverhaulDate" @bind-Value="Metafile.OverhaulDate" /></td>
+                        </tr>
+                    </table>
+                </EditForm>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" @onclick="() => Submit()">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal" @onclick="() => Close()">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (ShowBackdrop)
+{
+    <div class="modal-backdrop fade show"></div>
+}
+
+@code {
+    [CascadingParameter]
+    public UploadMetaData _Parent { get; set; }
+    [Parameter]
+    public MetaData Metafile { get; set; }
+    public Guid Guid = Guid.NewGuid();
+    public string ModalDisplay = "none;";
+    public string ModalClass = "";
+    public bool ShowBackdrop = false;
+    private MetaData FileClone = new();
+
+    public void Open()
+    {
+        ModalDisplay = "block;";
+        ModalClass = "Show";
+        ShowBackdrop = true;
+        if(Metafile != null)
+        {
+            FileClone.FileName = Metafile.FileName;
+            FileClone.PartNumber = Metafile.PartNumber;
+        }
+        StateHasChanged();
+    }
+
+    public void Submit()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        _Parent.Refresh();
+    }
+
+    public void Close()
+    {
+        ModalDisplay = "none";
+        ModalClass = "";
+        ShowBackdrop = false;
+        Metafile.PartNumber = FileClone.PartNumber;
+        _Parent.Refresh();
+    }
+}

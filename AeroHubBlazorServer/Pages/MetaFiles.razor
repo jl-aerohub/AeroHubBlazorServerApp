@@ -1,0 +1,54 @@
+﻿@using System.Diagnostics.CodeAnalysis
+@using AeroHubBlazorServer.Controllers
+@using AeroHubBlazorServer.Data
+@using AeroHubBlazorServer.Interfaces
+@using AeroHubBlazorServer.Models
+@using AeroHubBlazorServer.Pages
+@using Azure
+@using Azure.Storage.Blobs
+@inject MetaDatasController controller
+
+@page "/MetaFiles"
+
+<PageTitle>MetaFiles</PageTitle>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                FileName
+            </th>
+            <th>
+                DocumentType
+            </th>
+            <th>
+                FeatureItemids
+            </th>
+            <th>
+                PartNumber
+            </th>
+            <th>
+                FileLink
+            </th>
+            <th>
+                User
+            </th>
+            <th>
+                DateTime
+            </th>
+            <th>
+                Signatures
+            </th>
+            <th>
+                SupplierName
+            </th>
+            <th>
+                ProcessNumber
+            </th>
+            <th>
+                QP
+            </th>
+  
+        </tr>
+    </thead>
+</table>

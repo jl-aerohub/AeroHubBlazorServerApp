@@ -7,7 +7,6 @@
 @using Azure
 @using Azure.Storage.Blobs
 @inject ILogger<UploadMetaData> Logger
-@inject IWebHostEnvironment Environment
 @inject IStorageInterface azureBlobStorage
 @inject MetaDatasController controller
 
@@ -145,11 +144,8 @@
     private long combinedUploadSize = 0;
     private long totalUploadedBytes = 0;
 
-    private List<QIFDocument> QIFFiles = new();
-
     private EditModal Modal { get; set; }
 
- 
     private void LoadFiles(InputFileChangeEventArgs e)
     {
 

@@ -25,15 +25,18 @@
 <div>
     @*InputFile is a standard input box provided by AspNetCore*@
     <InputFile OnChange="OnInputFileChange" id="InputFile" multiple accept=".qif"></InputFile>
-
-<ul>
-    @foreach (QIFDocument QIFFile in QIFFiles)
-    {
-        <li>@QIFFile.QPID</li>
-    }
-</ul>
 </div>
-   
+
+<div>
+    <ul>
+        @foreach (QIFDocument QIFFile in QIFFiles)
+        {
+            <li>@QIFFile.QPID</li>
+            <li>Im Here</li>
+        }
+    </ul>
+</div>
+
 @if (qIFDocument.QPID != Guid.Empty)
 {
     //Load separate view under current view
@@ -53,6 +56,12 @@
     private QIFDocument qIFDocument = new();
 
     IBrowserFile? File;
+
+    protected override async Task OnInitializedAsync()
+    {
+        QIFFiles = await controller.GetQIFFiles();
+    }
+
     public async void OnInputFileChange(InputFileChangeEventArgs e)
     {
         using Stream ms = new MemoryStream();
@@ -67,7 +76,4 @@
 
         await InvokeAsync(StateHasChanged);
     }
-
-    protected override async Task OnInitializedAsync() => QIFFiles = await controller.GetQIFFiles();
-
 }

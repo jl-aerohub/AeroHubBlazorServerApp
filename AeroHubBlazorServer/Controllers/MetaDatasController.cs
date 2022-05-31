@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AeroHubBlazorServer.DbContexts;
 using AeroHubBlazorServer.Models;
@@ -16,9 +11,12 @@ namespace AeroHubBlazorServer.Controllers
     {
         private readonly MFINContext _context;
 
+        static HttpClient client;
+
         public MetaDatasController(MFINContext context)
         {
             _context = context;
+            client = new HttpClient();
         }
 
         // GET: api/MetaDatas
@@ -144,6 +142,20 @@ namespace AeroHubBlazorServer.Controllers
             }
 
             return await _context.QIFDocument.ToListAsync();
+        }
+
+        // GET api/files/sample.png
+        [HttpGet("{qpid}")]
+        public async Task GetQIF(string qpid)
+        {
+            Uri uri = new($" https://generateqif.azurewebsites.us/api/generateqif?qpid={qpid}");
+            var response = await client.GetAsync(uri);
+            using (var fs = new FileStream(@$"C:\Users\shainc\Downloads\{qpid}.xml",
+                FileMode.CreateNew))
+            {
+                await response.Content.CopyToAsync(fs);
+            }
+
         }
     }
 }

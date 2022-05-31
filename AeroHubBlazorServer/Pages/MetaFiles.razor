@@ -77,5 +77,49 @@
             </th>
         </tr>
     </thead>
+    <tbody>
+        @if (metaFiles != null)
+        {   
+            foreach (MetaData file in metaFiles)
+            {
+            <!-- File info -->
+            <tr>
+                <td>@file.FileName</td>
+                <td>@file.id</td>
+                <td>@file.DocumentType</td>
+                <td>@file.FeatureItemids</td>
+                <td>@file.PartNumber</td>
+                <td>@file.FileLink</td>
+                <td>@file.User</td>
+                <td>@file.DateTime;</td>
+                <td>@file.Signatures</td>
+                <td>@file.SupplierName</td>
+                <td>@file.ProcessNumber</td>
+                <td>@file.QPID</td>
+                <td>@file.NDANumber</td>
+                <td>@file.IPNumber</td>
+                <td>@file.LTANumber</td>
+                <td>@file.MVANumber</td>
+                <td>@file.SupplierDocumentNumber</td>
+                <td>@file.EngineSerialNumber</td>
+                <td>@file.EngineOperator</td>
+                <td>@file.OverhaulDate</td>
+            </tr>
+            }
+        }
+    </tbody>
    
 </table>
+
+@code {
+    private List<MetaData> metaFiles = new();
+    private MetaData metafile = new();
+
+    IBrowserFile? File;
+
+    protected override async Task OnInitializedAsync()
+    {
+        metaFiles = await controller.GetMetaData();
+    }
+
+}

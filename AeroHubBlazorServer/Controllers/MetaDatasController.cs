@@ -21,31 +21,14 @@ namespace AeroHubBlazorServer.Controllers
 
         // GET: api/MetaDatas
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MetaData>>> GetMetaData()
+        public async Task<List<MetaData>> GetMetaData()
         {
-          if (_context.MetaData == null)
-          {
-              return NotFound();
-          }
-            return await _context.MetaData.ToListAsync();
-        }
-
-        // GET: api/MetaDatas/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<MetaData>> GetMetaData(int id)
-        {
-          if (_context.MetaData == null)
-          {
-              return NotFound();
-          }
-            var metaData = await _context.MetaData.FindAsync(id);
-
-            if (metaData == null)
+            if (_context.QIFDocument == null)
             {
-                return NotFound();
+                throw new InvalidOperationException("The database context is null");
             }
 
-            return metaData;
+            return await _context.MetaData.ToListAsync();
         }
 
         // PUT: api/MetaDatas/5

@@ -1,33 +1,43 @@
 ﻿@page "/"
+@using FileHandlingServer.Data
+@inject AzureStorageHelper AzureStorageHelper
+@inject IConfiguration Configuration
 
-<h3>Upload photo</h3>
-@if (ImageUrl != "")
+<h3>Upload File to Azure</h3>
+@if (FileUrl != "")
 {
-    <img src="@ImageUrl" />
+    <img src="@FileUrl" />
     <br />
     <br />
 }
+
 <div class="dropArea @dropClass">
-    Drag and drop photo, or click to select a local file.
+    Drag and drop file, or click to select a local file.
     <InputFile disabled="@Uploading"
                OnChange="OnInputFileChange"
                @ondragenter="HandleDragEnter"
                @ondragleave="HandleDragLeave" />
 </div>
+
 <br />
-<h3>Files</h3>
+
+<h3>Blob Files</h3>
+
 <ul>
-    @foreach (var url in FileUrls)
+    @foreach (var url in BlobFileUrls)
     {
         <li><a href="@url">@url</a><br /></li>
     }
 </ul>
+
 @code
 {
-
-    string ImageUrl = "";
+    string FileUrl = "";
     bool Uploading = false;
-    List<string> FileUrls = new List<string>();
+    long UploadedBytes;
+    long TotalBytes;
+    List<string> BlobFileUrls = new List<string>();
+    string ContainerName = "pythonin"; // This could optionally be in the config file
 
     // support for drag/drop
     string dropClass = string.Empty;
@@ -40,6 +50,12 @@
         dropClass = string.Empty;
     }
 
+    /// <summary>
+    /// Occurs when a large file is selected or dropped
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    
     async Task OnInputFileChange(InputFileChangeEventArgs args)
     {
         dropClass = string.Empty;
@@ -60,15 +76,24 @@
 
             // get new filename with a bit of entropy
             string justFileName = Path.GetFileNameWithoutExtension(args.File.Name);
-            string newFileNameWithoutPath = $"{justFileName}-{DateTime.Now.Ticks.ToString()}.png";
+            string newFileNameWithoutPath = $"{justFileName}-{DateTime.Now.Ticks.ToString()}";
             string filename = $"{Environment.CurrentDirectory}\\files\\{newFileNameWithoutPath}";
 
             // write the file
             File.WriteAllBytes(filename, buffer);
 
-            ImageUrl = $"files/{newFileNameWithoutPath}";
+            // upload to Azure Storage
+            string baseUrl = Configuration["StorageBaseUrl"];
+            string bloburl = $"{baseUrl}{ContainerName}/";
 
-            await ListFiles();
+            // Copy to Azure
+            FileUrl = await AzureStorageHelper.UploadFile(ContainerName, filename, newFileNameWithoutPath, false);
+            if (FileUrl != "")
+            {
+                // delete local file
+                File.Delete(filename);
+                await ListFiles();
+            }
 
             Uploading = false;
 
@@ -84,14 +109,7 @@
 
     async Task ListFiles()
     {
-        FileUrls.Clear();
-        var files = Directory.GetFiles(Environment.CurrentDirectory + "\\Files", "*.*");
-        foreach (var filename in files)
-        {
-            var file = Path.GetFileName(filename);
-            string url = $"files/{file}";
-            FileUrls.Add(url);
-        }
+        BlobFileUrls = await AzureStorageHelper.GetFileList(ContainerName);
         await InvokeAsync(StateHasChanged);
     }
 
@@ -99,5 +117,4 @@
     {
         await ListFiles();
     }
-
 }
